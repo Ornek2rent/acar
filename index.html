@@ -1,16 +1,14 @@
-<!-- index.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rent-a-Car | Book Now</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="js/config.js" defer></script>
-  <script src="js/index.js" defer></script>
-</head>
 <body>
   <main class="form-container">
+    <!-- Theme toggle switch -->
+    <div class="theme-toggle">
+      <label for="themeToggle" class="switch">
+        <input type="checkbox" id="themeToggle" />
+        <span class="slider"></span>
+      </label>
+      <span>Dark Mode</span>
+    </div>
+
     <h1>Book Your Car</h1>
     <form id="bookingForm" target="hidden_iframe" method="POST" action="">
       <label for="pickupLocation">Pickup Location:</label>
@@ -31,4 +29,3 @@
     <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
   </main>
 </body>
-</html>
