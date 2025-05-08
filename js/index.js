@@ -1,3 +1,5 @@
+// index.js //
+
 // Form submission
 document.getElementById("bookingForm").addEventListener("submit", function () {
   this.action = CONFIG.FORM_ENDPOINT;
