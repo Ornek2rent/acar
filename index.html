@@ -1,4 +1,4 @@
- <!-- index.html -->
+<!-- index.html -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -6,28 +6,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rent-a-Car | Book Now</title>
+
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/config.js" defer></script>
+  <script src="js/load-header.js" defer></script> <!-- Load modular header -->
   <script src="js/index.js" defer></script>
 </head>
 <body data-theme="light">
-  <!-- Header with logo, dark/light mode toggle, and user icon -->
-  <header class="site-header">
-    <div class="logo-container">
-      <img src="img/9.jpg" alt="Company Logo" class="logo" />
-    </div>
-    <div class="header-actions">
-      <!-- Dark/Light Mode Switch -->
-      <button id="darkModeToggle" class="toggle-btn">
-        <span id="sunIcon">&#9737;</span>
-        <span id="moonIcon">&#9790;</span>
-      </button>
-      <!-- User Icon Placeholder -->
-      <button id="userIcon" class="toggle-btn">
-        <span>&#128100;</span> <!-- Placeholder for user icon -->
-      </button>
-    </div>
-  </header>
+  <!-- Modular Header Placeholder -->
+  <div id="header-container"></div>
 
   <main class="form-container">
     <h1>Book Your Car</h1>
