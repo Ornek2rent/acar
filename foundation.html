@@ -1,3 +1,5 @@
+/* foundation.html */
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,35 +8,31 @@
   <title>Rent-a-Car Booking</title>
   <link rel="stylesheet" href="css/style.css">
   <script>
-    // Initialize theme and booking ID
+    // Theme initialization only (safe in head)
     (function() {
-      // Theme setup
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
-      
-      // Booking ID from URL or storage
-      const urlParams = new URLSearchParams(window.location.search);
-      const bookingId = urlParams.get('booking') || localStorage.getItem('bookingId');
-      if (bookingId) {
-        localStorage.setItem('bookingId', bookingId);
-        document.getElementById('booking-id').textContent = `Booking #${bookingId}`;
-      }
     })();
   </script>
 </head>
 <body>
   <header>
     <div id="header-container"></div>
+    <!-- Future: Step progress bar will go here -->
     <div id="booking-id" class="booking-id"></div>
   </header>
 
   <main id="app">
-    <!-- SPA content loads here -->
     <div class="spa-loading">
       <div class="loader"></div>
       <p>Loading your booking...</p>
     </div>
   </main>
+
+  <footer>
+    <!-- Future: Real-time receipt goes here -->
+    <div id="price-summary"></div>
+  </footer>
 
   <script src="js/foundation.js"></script>
 </body>
