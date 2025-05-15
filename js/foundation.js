@@ -1,50 +1,81 @@
 // foundation.js
+class BookingSPA {
+  constructor() {
+    this.currentView = null;
+    this.init();
+  }
 
-// Utility: Load subpage HTML into #app
-async function loadStep(step) {
-  const container = document.getElementById('app');
-  container.innerHTML = '<p>Loading...</p>';
-  try {
-    const response = await fetch(`pages/${step}.html`);
-    if (!response.ok) throw new Error('Failed to load page');
-    const html = await response.text();
-    container.innerHTML = html;
-    history.pushState({ step }, '', `?step=${step}`);
-  } catch (error) {
-    container.innerHTML = '<p>Error loading page. Please try again.</p>';
-    console.error(error);
+  async init() {
+    this.setupEventListeners();
+    await this.loadView(this.getInitialView());
+  }
+
+  async loadView(view) {
+    try {
+      this.showLoadingState();
+      
+      // Load HTML
+      const html = await fetch(`views/${view}.html`).then(r => r.text());
+      document.getElementById('app').innerHTML = html;
+      this.currentView = view;
+      
+      // Load JS
+      await this.loadViewScript(view);
+      
+      // Update URL
+      history.pushState({ view }, '', `?view=${view}`);
+      
+    } catch (error) {
+      this.showErrorState();
+      console.error(`Failed loading ${view}:`, error);
+    }
+  }
+
+  async loadViewScript(view) {
+    try {
+      const module = await import(`./modules/${view}.js`);
+      if (module.init) module.init();
+    } catch (error) {
+      console.warn(`No JS module for ${view}`);
+    }
+  }
+
+  setupEventListeners() {
+    // SPA Navigation
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('[data-spa-link]');
+      if (link) {
+        e.preventDefault();
+        this.loadView(link.dataset.view);
+      }
+    });
+
+    // Browser navigation
+    window.addEventListener('popstate', (e) => {
+      this.loadView(e.state?.view || this.getInitialView());
+    });
+  }
+
+  getInitialView() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('view') || 'vehicle-selection';
+  }
+
+  showLoadingState() {
+    document.getElementById('app').innerHTML = `
+      <div class="spa-loading">
+        <div class="loader"></div>
+      </div>`;
+  }
+
+  showErrorState() {
+    document.getElementById('app').innerHTML = `
+      <div class="error-state">
+        <p>Failed to load page</p>
+        <button onclick="window.location.reload()">Retry</button>
+      </div>`;
   }
 }
 
-// Handle theme switching
-function initThemeToggle() {
-  const toggle = document.getElementById('themeToggle');
-  const currentTheme = localStorage.getItem('theme') || 'light';
-  document.documentElement.setAttribute('data-theme', currentTheme);
-  toggle.checked = currentTheme === 'dark';
-
-  toggle.addEventListener('change', () => {
-    const newTheme = toggle.checked ? 'dark' : 'light';
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
-  });
-}
-
-// Get step from URL
-function getStepFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('step') || 'vehicle-selection';
-}
-
-// Handle back/forward browser navigation
-window.addEventListener('popstate', (event) => {
-  const step = (event.state && event.state.step) || getStepFromURL();
-  loadStep(step);
-});
-
-// Init
-window.addEventListener('DOMContentLoaded', () => {
-  initThemeToggle();
-  const step = getStepFromURL();
-  loadStep(step);
-});
+// Initialize
+new BookingSPA();
