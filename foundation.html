@@ -1,0 +1,37 @@
+<!-- foundation.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Booking Flow</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script>
+    // Apply theme as early as possible to avoid flash
+    const theme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+  </script>
+</head>
+<body>
+  <header>
+    <h1>Continue Booking</h1>
+    <div class="theme-toggle">
+      <label class="switch">
+        <input type="checkbox" id="themeToggle" />
+        <span class="slider"></span>
+      </label>
+    </div>
+  </header>
+
+  <main id="app">
+    <!-- Subpages will load here -->
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Rent-a-Car Company</p>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/foundation.js"></script>
+</body>
+</html>
