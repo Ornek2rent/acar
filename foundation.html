@@ -1,4 +1,4 @@
-/* foundation.html */
+// foundation.html 
 
 <!DOCTYPE html>
 <html lang="en">
@@ -7,8 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rent-a-Car Booking</title>
   <link rel="stylesheet" href="css/style.css">
+  <!-- Only theme init remains in head -->
   <script>
-    // Theme initialization only (safe in head)
     (function() {
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
@@ -18,7 +18,9 @@
 <body>
   <header>
     <div id="header-container"></div>
-    <!-- Future: Step progress bar will go here -->
+    <!-- Step indicator placeholder (empty until initialized) -->
+    <div id="step-indicator"></div>
+    <!-- Booking ID will be populated by foundation.js -->
     <div id="booking-id" class="booking-id"></div>
   </header>
 
@@ -30,7 +32,7 @@
   </main>
 
   <footer>
-    <!-- Future: Real-time receipt goes here -->
+    <!-- Price summary will be injected here -->
     <div id="price-summary"></div>
   </footer>
 
