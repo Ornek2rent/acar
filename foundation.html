@@ -3,35 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Booking Flow</title>
+  <title>Rent-a-Car Booking</title>
   <link rel="stylesheet" href="css/style.css">
-  <!-- Preload first view -->
-  <link rel="preload" href="views/vehicle-selection.html" as="document">
   <script>
-    // Immediate theme and booking ID setup
+    // Initialize theme and booking ID
     (function() {
+      // Theme setup
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
       
+      // Booking ID from URL or storage
       const urlParams = new URLSearchParams(window.location.search);
       const bookingId = urlParams.get('booking') || localStorage.getItem('bookingId');
-      if (bookingId) localStorage.setItem('bookingId', bookingId);
+      if (bookingId) {
+        localStorage.setItem('bookingId', bookingId);
+        document.getElementById('booking-id').textContent = `Booking #${bookingId}`;
+      }
     })();
   </script>
 </head>
 <body>
   <header>
     <div id="header-container"></div>
-    <div id="booking-id-display"></div>
+    <div id="booking-id" class="booking-id"></div>
   </header>
 
   <main id="app">
-    <!-- Initial loading state -->
+    <!-- SPA content loads here -->
     <div class="spa-loading">
       <div class="loader"></div>
+      <p>Loading your booking...</p>
     </div>
   </main>
 
-  <script src="js/foundation.js" type="module"></script>
+  <script src="js/foundation.js"></script>
 </body>
 </html>
