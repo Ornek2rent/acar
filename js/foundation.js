@@ -3,27 +3,72 @@
 class BookingSPA {
   constructor() {
     this.currentPage = null;
+    this.bookingId = null;
     this.scriptsLoaded = new Set();
     this.init();
   }
 
   async init() {
     this.setupThemeToggle();
+    this.updateBookingId();
     this.setupNavigation();
     await this.loadPage(this.getCurrentPage());
   }
 
-  async loadPage(page) {
+  // 1. COMPLETED: Booking ID Management (with your suggested warning)
+  updateBookingId() {
     try {
-      if (!page || typeof page !== 'string') {
-        throw new Error(`Invalid page requested: ${page}`);
+      const urlParams = new URLSearchParams(window.location.search);
+      this.bookingId = urlParams.get('booking') || localStorage.getItem('bookingId');
+      
+      if (this.bookingId) {
+        localStorage.setItem('bookingId', this.bookingId);
+        document.body.dataset.bookingId = this.bookingId;
+        
+        const bookingEl = document.getElementById('booking-id');
+        if (bookingEl) {
+          bookingEl.textContent = `Booking #${this.bookingId}`;
+        } else {
+          console.warn('#booking-id element not found in DOM');
+        }
       }
+    } catch (error) {
+      console.error('Booking ID update failed:', error);
+    }
+  }
 
+  // 2. COMPLETED: Navigation Setup (your requested method)
+  setupNavigation() {
+    // Handle SPA links
+    const handleNavigation = (e) => {
+      const link = e.target.closest('[data-spa-link]');
+      if (link) {
+        e.preventDefault();
+        this.loadPage(link.dataset.page);
+      }
+    };
+
+    document.addEventListener('click', handleNavigation);
+    document.addEventListener('touchend', handleNavigation);
+
+    // Browser history
+    window.addEventListener('popstate', (e) => {
+      if (e.state?.page) {
+        this.loadPage(e.state.page);
+      }
+    });
+  }
+
+  // 3. COMPLETED: Page Loading (your improved version)
+  async loadPage(page) {
+    if (!page || this.currentPage === page) return;
+
+    try {
       this.showLoadingState();
       
       // Load HTML
       const response = await fetch(`pages/${page}.html`);
-      if (!response.ok) throw new Error(`Failed to load ${page}.html`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const html = await response.text();
       
       // Inject content
@@ -37,31 +82,30 @@ class BookingSPA {
       history.pushState({ page }, '', `?page=${page}`);
       
     } catch (error) {
-      console.error('Page load error:', error);
-      this.showErrorState();
+      console.error(`Failed loading ${page}:`, error);
+      this.showErrorState(page);
     }
   }
 
+  // 4. COMPLETED: Script Loading (optimized)
   async loadPageScript(page) {
     return new Promise((resolve) => {
-      // Cleanup previous script
+      // Cleanup previous
       const oldScript = document.getElementById('page-script');
       if (oldScript) oldScript.remove();
 
-      // Create new script
+      // Load new
       const script = document.createElement('script');
       script.id = 'page-script';
       script.src = `js/${page}.js`;
       
       script.onload = () => {
-        if (window[`init${this.camelCase(page)}`]) {
-          window[`init${this.camelCase(page)}`]();
-        }
+        this.scriptsLoaded.add(page);
         resolve();
       };
       
       script.onerror = () => {
-        console.warn(`Script failed to load: ${page}.js`);
+        console.warn(`Script failed: ${page}.js`);
         resolve();
       };
       
@@ -69,59 +113,31 @@ class BookingSPA {
     });
   }
 
-  camelCase(str) {
-    return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
-  }
-
-  setupThemeToggle() {
-    const toggle = document.getElementById('themeToggle');
-    if (!toggle) return;
-    
-    toggle.checked = localStorage.getItem('theme') === 'dark';
-    toggle.addEventListener('change', () => {
-      const newTheme = toggle.checked ? 'dark' : 'light';
-      localStorage.setItem('theme', newTheme);
-      document.documentElement.setAttribute('data-theme', newTheme);
-    });
-  }
-
-  setupNavigation() {
-    const handleSPAClick = (e) => {
-      const link = e.target.closest('[data-spa-link]');
-      if (link && !e.defaultPrevented) {
-        e.preventDefault();
-        this.loadPage(link.dataset.page);
-      }
-    };
-
-    document.addEventListener('click', handleSPAClick);
-    document.addEventListener('touchend', handleSPAClick);
-
-    window.addEventListener('popstate', (e) => {
-      if (e.state?.page) {
-        this.loadPage(e.state.page);
-      }
-    });
-  }
-
+  // 5. COMPLETED: Current Page Detection (your suggested improvement)
   getCurrentPage() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('page') || 'vehicle-selection';
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('page') || 'vehicle-selection';
+    } catch (error) {
+      console.warn('URL parse error, defaulting to vehicle-selection');
+      return 'vehicle-selection';
+    }
   }
 
+  // Helper Methods
   showLoadingState() {
     document.getElementById('app').innerHTML = `
       <div class="spa-loading">
         <div class="loader"></div>
-        <p>Loading ${this.getPageName(this.getCurrentPage())}...</p>
+        <p>Loading ${this.getPageName(this.currentPage)}...</p>
       </div>`;
   }
 
-  showErrorState() {
+  showErrorState(page) {
     document.getElementById('app').innerHTML = `
       <div class="error-state">
-        <h3>Failed to load page</h3>
-        <button class="retry-btn" onclick="window.bookingSPA.loadPage('${this.currentPage}')">
+        <h3>Failed to load ${this.getPageName(page)}</h3>
+        <button class="retry-btn" onclick="window.bookingSPA.loadPage('${page}')">
           Retry
         </button>
       </div>`;
@@ -135,6 +151,19 @@ class BookingSPA {
       'thankyou': 'Confirmation'
     };
     return names[page] || 'Page';
+  }
+
+  // Theme System
+  setupThemeToggle() {
+    const toggle = document.getElementById('themeToggle');
+    if (!toggle) return;
+
+    toggle.checked = localStorage.getItem('theme') === 'dark';
+    toggle.addEventListener('change', () => {
+      const newTheme = toggle.checked ? 'dark' : 'light';
+      localStorage.setItem('theme', newTheme);
+      document.documentElement.setAttribute('data-theme', newTheme);
+    });
   }
 }
 
