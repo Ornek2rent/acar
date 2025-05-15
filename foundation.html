@@ -1,37 +1,37 @@
-<!-- foundation.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Booking Flow</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Preload first view -->
+  <link rel="preload" href="views/vehicle-selection.html" as="document">
   <script>
-    // Apply theme as early as possible to avoid flash
-    const theme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', theme);
+    // Immediate theme and booking ID setup
+    (function() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const bookingId = urlParams.get('booking') || localStorage.getItem('bookingId');
+      if (bookingId) localStorage.setItem('bookingId', bookingId);
+    })();
   </script>
 </head>
 <body>
   <header>
-    <h1>Continue Booking</h1>
-    <div class="theme-toggle">
-      <label class="switch">
-        <input type="checkbox" id="themeToggle" />
-        <span class="slider"></span>
-      </label>
-    </div>
+    <div id="header-container"></div>
+    <div id="booking-id-display"></div>
   </header>
 
   <main id="app">
-    <!-- Subpages will load here -->
+    <!-- Initial loading state -->
+    <div class="spa-loading">
+      <div class="loader"></div>
+    </div>
   </main>
 
-  <footer>
-    <p>&copy; 2025 Rent-a-Car Company</p>
-  </footer>
-
-  <script src="js/config.js"></script>
-  <script src="js/foundation.js"></script>
+  <script src="js/foundation.js" type="module"></script>
 </body>
 </html>
