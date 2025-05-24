@@ -90,6 +90,12 @@ class VehicleSelection {
     });
 
     this.elements.retryBtn?.addEventListener('click', () => this.loadVehicles());
+
+    this.elements.continueBtn?.addEventListener('click', () => {
+      if (this.state.selectedVehicle) {
+        window.location.href = 'extras.html';
+      }
+    });
   }
 
   selectVehicle(vehicleId) {
