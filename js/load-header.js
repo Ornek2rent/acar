@@ -1,19 +1,19 @@
-/* load-header.js */
+<!-- Header Component -->
+<header class="site-header">
+  <div class="logo-container">
+    <a href="foundation.html" data-spa-link aria-label="Go to homepage">
+      <img src="img/logo.jpg" alt="Company Logo" class="logo" />
+    </a>
+  </div>
 
-document.addEventListener("DOMContentLoaded", function () {
-  fetch("components/header.html")
-    .then((response) => response.text())
-    .then((data) => {
-      document.getElementById("header-container").innerHTML = data;
+  <div class="header-actions">
+    <button id="darkModeToggle" class="toggle-btn" aria-label="Toggle dark mode">
+      <span id="sunIcon">&#9737;</span>
+      <span id="moonIcon">&#9790;</span>
+    </button>
 
-      // Reattach event listeners after injection
-      const toggle = document.getElementById("darkModeToggle");
-      if (toggle) {
-        toggle.addEventListener("click", () => {
-          const currentTheme = document.body.getAttribute("data-theme");
-          const newTheme = currentTheme === "dark" ? "light" : "dark";
-          document.body.setAttribute("data-theme", newTheme);
-        });
-      }
-    });
-});
+    <button id="userIcon" class="toggle-btn" aria-label="User account">
+      <span>&#128100;</span>
+    </button>
+  </div>
+</header>
