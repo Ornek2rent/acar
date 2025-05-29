@@ -1,6 +1,6 @@
 // postman.js
 
-const POSTMAN = {
+const Postman = {
   // HTML Pages
   INDEX_HTML: 'index.html',
   FOUNDATION_HTML: 'foundation.html',
@@ -34,6 +34,6 @@ const POSTMAN = {
 
   // Utility
   get(path) {
-    return POSTMAN[path] || path;
+    return Postman[path] || path;
   }
 };
