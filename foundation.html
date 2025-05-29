@@ -1,23 +1,124 @@
-<!-- foundation.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rent-a-Car Booking</title>
+// foundation.js
 
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="js/config.js" defer></script>
-  <script src="js/postman.js" defer></script>
-  <script src="js/foundation.js" defer></script>
-</head>
-<body data-theme="light">
-  <div id="header-container"></div>
+document.addEventListener('DOMContentLoaded', () => {
+  const app = document.getElementById('app');
+  const headerContainer = document.getElementById('header-container');
+  const footerContainer = document.getElementById('footer-container');
 
-  <main id="app" role="main">
-    <div class="loading">Loading...</div>
-  </main>
+  // Load reusable components
+  loadComponent(Postman.HEADER, headerContainer, initHeader);
+  loadComponent(Postman.FOOTER, footerContainer);
 
-  <div id="footer-container"></div>
-</body>
-</html>
+  // Initial route
+  const initialPage = getInitialPage();
+  loadPage(initialPage);
+
+  // Listen to internal navigation
+  document.body.addEventListener('click', (e) => {
+    const link = e.target.closest('[data-spa-link]');
+    if (link) {
+      e.preventDefault();
+      const page = link.getAttribute('data-spa-link');
+      navigateTo(page);
+    }
+  });
+
+  // Handle browser navigation
+  window.addEventListener('popstate', () => {
+    const page = window.location.pathname.split('/').pop().replace('.html', '') || 'vehicle-selection';
+    loadPage(page);
+  });
+
+  // Theme setup
+  applyStoredTheme();
+});
+
+/* ------------------- Core Functions ------------------- */
+
+function getInitialPage() {
+  const path = window.location.pathname.split('/').pop();
+  return path && path !== 'foundation.html' ? path.replace('.html', '') : 'vehicle-selection';
+}
+
+function navigateTo(page) {
+  window.history.pushState({}, '', `${page}.html`);
+  loadPage(page);
+}
+
+async function loadPage(page) {
+  const app = document.getElementById('app');
+  if (!app) return;
+
+  app.innerHTML = '<div class="loading">Loading...</div>';
+
+  try {
+    const res = await fetch(Postman.get(`pages/${page}.html`));
+    if (!res.ok) throw new Error(`Page load failed: ${res.status}`);
+    const html = await res.text();
+    app.innerHTML = html;
+
+    // Dynamically load associated script
+    const scriptPath = Postman.get(`js/${page}.js`);
+    loadScript(scriptPath, () => {
+      const initFnName = `init${toCamelCase(page)}`;
+      if (typeof window[initFnName] === 'function') {
+        window[initFnName]();
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    app.innerHTML = `<div class="error">Failed to load page: ${page}</div>`;
+  }
+}
+
+function loadScript(src, onload) {
+  const existing = document.querySelector(`script[src="${src}"]`);
+  if (existing) {
+    existing.remove();
+  }
+  const script = document.createElement('script');
+  script.src = src;
+  script.defer = true;
+  script.onload = onload;
+  script.onerror = () => console.error(`Failed to load script: ${src}`);
+  document.body.appendChild(script);
+}
+
+function loadComponent(path, container, callback) {
+  if (!container) return;
+  fetch(Postman.get(path))
+    .then((res) => res.text())
+    .then((html) => {
+      container.innerHTML = html;
+      if (typeof callback === 'function') callback();
+    })
+    .catch((err) => console.error(`Failed to load component ${path}:`, err));
+}
+
+/* ------------------- Theme ------------------- */
+
+function applyStoredTheme() {
+  const storedTheme = localStorage.getItem('theme') || 'light';
+  document.body.setAttribute('data-theme', storedTheme);
+}
+
+function initHeader() {
+  const toggleBtn = document.getElementById('darkModeToggle');
+  if (!toggleBtn) return;
+
+  toggleBtn.addEventListener('click', () => {
+    const current = document.body.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  });
+}
+
+/* ------------------- Utilities ------------------- */
+
+function toCamelCase(str) {
+  return str
+    .split('-')
+    .map((s, i) => (i === 0 ? s : s[0].toUpperCase() + s.slice(1)))
+    .join('');
+}
