@@ -1,4 +1,4 @@
-// foundation.js
+// js/foundation.js
 
 document.addEventListener("DOMContentLoaded", async () => {
   const query = new URLSearchParams(window.location.search);
