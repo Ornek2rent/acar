@@ -1,38 +1,23 @@
 <!-- foundation.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rent-a-Car Booking</title>
+
   <link rel="stylesheet" href="css/style.css" />
-
-  <!-- Theme Initialization -->
-  <script>
-    (function () {
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    })();
-  </script>
+  <script src="js/config.js" defer></script>
+  <script src="js/postman.js" defer></script>
+  <script src="js/foundation.js" defer></script>
 </head>
-<body>
-  <!-- Dynamically loaded header -->
-  <header id="header"></header>
+<body data-theme="light">
+  <div id="header-container"></div>
 
-  <!-- Main SPA container -->
-  <main id="app">
-    <div class="spa-loading">
-      <div class="loader"></div>
-      <p>Loading your booking...</p>
-    </div>
+  <main id="app" role="main">
+    <div class="loading">Loading...</div>
   </main>
 
-  <!-- Dynamically loaded footer -->
-  <footer id="footer"></footer>
-
-  <!-- JS dependencies -->
-  <script src="postman.js" defer></script>
-  <script src="js/foundation.js" defer></script>
+  <div id="footer-container"></div>
 </body>
 </html>
