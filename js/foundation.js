@@ -1,4 +1,4 @@
-/* foundation.js */
+// foundation.js
 
 class BookingSPA {
   constructor() {
@@ -15,16 +15,15 @@ class BookingSPA {
     await this.loadPage(this.getCurrentPage());
   }
 
-  // 1. COMPLETED: Booking ID Management (with your suggested warning)
   updateBookingId() {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       this.bookingId = urlParams.get('booking') || localStorage.getItem('bookingId');
-      
+
       if (this.bookingId) {
         localStorage.setItem('bookingId', this.bookingId);
         document.body.dataset.bookingId = this.bookingId;
-        
+
         const bookingEl = document.getElementById('booking-id');
         if (bookingEl) {
           bookingEl.textContent = `Booking #${this.bookingId}`;
@@ -37,9 +36,7 @@ class BookingSPA {
     }
   }
 
-  // 2. COMPLETED: Navigation Setup (your requested method)
   setupNavigation() {
-    // Handle SPA links
     const handleNavigation = (e) => {
       const link = e.target.closest('[data-spa-link]');
       if (link) {
@@ -51,7 +48,6 @@ class BookingSPA {
     document.addEventListener('click', handleNavigation);
     document.addEventListener('touchend', handleNavigation);
 
-    // Browser history
     window.addEventListener('popstate', (e) => {
       if (e.state?.page) {
         this.loadPage(e.state.page);
@@ -59,61 +55,51 @@ class BookingSPA {
     });
   }
 
-  // 3. COMPLETED: Page Loading (your improved version)
   async loadPage(page) {
     if (!page || this.currentPage === page) return;
 
     try {
       this.showLoadingState();
-      
-      // Load HTML
-      const response = await fetch(`pages/${page}.html`);
+
+      const response = await fetch(Postman.getPagePath(page));
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const html = await response.text();
-      
-      // Inject content
+
       document.getElementById('app').innerHTML = html;
       this.currentPage = page;
-      
-      // Load JS
+
       await this.loadPageScript(page);
-      
-      // Update history
+
       history.pushState({ page }, '', `?page=${page}`);
-      
     } catch (error) {
       console.error(`Failed loading ${page}:`, error);
       this.showErrorState(page);
     }
   }
 
-  // 4. COMPLETED: Script Loading (optimized)
   async loadPageScript(page) {
     return new Promise((resolve) => {
-      // Cleanup previous
       const oldScript = document.getElementById('page-script');
       if (oldScript) oldScript.remove();
 
-      // Load new
       const script = document.createElement('script');
       script.id = 'page-script';
-      script.src = `js/${page}.js`;
-      
+      script.src = Postman.getScriptPath(page);
+
       script.onload = () => {
         this.scriptsLoaded.add(page);
         resolve();
       };
-      
+
       script.onerror = () => {
         console.warn(`Script failed: ${page}.js`);
         resolve();
       };
-      
+
       document.body.appendChild(script);
     });
   }
 
-  // 5. COMPLETED: Current Page Detection (your suggested improvement)
   getCurrentPage() {
     try {
       const params = new URLSearchParams(window.location.search);
@@ -124,7 +110,6 @@ class BookingSPA {
     }
   }
 
-  // Helper Methods
   showLoadingState() {
     document.getElementById('app').innerHTML = `
       <div class="spa-loading">
@@ -153,7 +138,6 @@ class BookingSPA {
     return names[page] || 'Page';
   }
 
-  // Theme System
   setupThemeToggle() {
     const toggle = document.getElementById('themeToggle');
     if (!toggle) return;
@@ -167,5 +151,4 @@ class BookingSPA {
   }
 }
 
-// Initialize
 window.bookingSPA = new BookingSPA();
