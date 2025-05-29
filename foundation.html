@@ -1,29 +1,26 @@
-// foundation.html 
+<!-- foundation.html -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Rent-a-Car Booking</title>
-  <link rel="stylesheet" href="css/style.css">
-  <!-- Only theme init remains in head -->
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Theme Initialization -->
   <script>
-    (function() {
+    (function () {
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
 </head>
 <body>
-  <header>
-    <div id="header-container"></div>
-    <!-- Step indicator placeholder (empty until initialized) -->
-    <div id="step-indicator"></div>
-    <!-- Booking ID will be populated by foundation.js -->
-    <div id="booking-id" class="booking-id"></div>
-  </header>
+  <!-- Dynamically loaded header -->
+  <header id="header"></header>
 
+  <!-- Main SPA container -->
   <main id="app">
     <div class="spa-loading">
       <div class="loader"></div>
@@ -31,11 +28,11 @@
     </div>
   </main>
 
-  <footer>
-    <!-- Price summary will be injected here -->
-    <div id="price-summary"></div>
-  </footer>
+  <!-- Dynamically loaded footer -->
+  <footer id="footer"></footer>
 
-  <script src="js/foundation.js"></script>
+  <!-- JS dependencies -->
+  <script src="postman.js" defer></script>
+  <script src="js/foundation.js" defer></script>
 </body>
 </html>
