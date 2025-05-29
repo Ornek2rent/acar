@@ -1,102 +1,32 @@
 // foundation.js
 
-const SPA = {
-  currentView: null,
-  viewCleanup: null, // for teardown functions
+document.addEventListener("DOMContentLoaded", async () => {
+  const query = new URLSearchParams(window.location.search);
+  const page = query.get("page") || "vehicle-selection";
 
-  async loadView(filePath) {
-    const app = document.getElementById('app');
-    app.innerHTML = '<div class="loading">Loading...</div>';
+  const app = document.getElementById("app");
 
-    try {
-      const response = await fetch(filePath);
-      if (!response.ok) throw new Error(`Failed to fetch ${filePath}`);
+  try {
+    // Load header
+    const headerRes = await fetch(Postman.get("components/header.html"));
+    document.getElementById("header-container").innerHTML = await headerRes.text();
 
-      const html = await response.text();
-      app.innerHTML = html;
+    // Load footer
+    const footerRes = await fetch(Postman.get("components/footer.html"));
+    document.getElementById("footer-container").innerHTML = await footerRes.text();
 
-      if (SPA.viewCleanup) {
-        SPA.viewCleanup(); // Clean up previous view
-        SPA.viewCleanup = null;
-      }
+    // Load main content
+    const htmlRes = await fetch(Postman.get(`pages/${page}.html`));
+    const html = await htmlRes.text();
+    app.innerHTML = html;
 
-      SPA.runViewScript(filePath);
-
-    } catch (err) {
-      app.innerHTML = `
-        <div class="error">
-          <p>Something went wrong.</p>
-          <pre>${err.message}</pre>
-        </div>`;
-      console.error(err);
-    }
-  },
-
-  runViewScript(filePath) {
-    const pageKey = filePath.split('/').pop().replace('.html', '');
-    const scriptPath = `js/${pageKey}.js`;
-
-    const script = document.createElement('script');
-    script.src = scriptPath;
+    // Load associated script
+    const script = document.createElement("script");
+    script.src = Postman.get(`js/${page}.js`);
     script.defer = true;
-
-    script.onload = () => {
-      if (typeof window[`init${SPA.capitalize(pageKey)}`] === 'function') {
-        SPA.viewCleanup = window[`init${SPA.capitalize(pageKey)}`]();
-      }
-    };
-
-    document.head.appendChild(script);
-  },
-
-  capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  },
-
-  navigateTo(path, pushState = true) {
-    if (pushState) window.history.pushState({ path }, '', path);
-    SPA.route(path);
-  },
-
-  route(path) {
-    switch (path) {
-      case '/vehicle-selection':
-        SPA.loadView(POSTMAN.VEHICLE_SELECTION_HTML);
-        break;
-      case '/extras':
-        SPA.loadView(POSTMAN.EXTRAS_HTML);
-        break;
-      case '/payment':
-        SPA.loadView(POSTMAN.DETAILS_PAYMENT_HTML);
-        break;
-      case '/thankyou':
-        SPA.loadView(POSTMAN.THANKYOU_HTML);
-        break;
-      default:
-        SPA.loadView(POSTMAN.VEHICLE_SELECTION_HTML);
-    }
-  },
-
-  init() {
-    window.bookingSPA = true;
-
-    // Handle popstate
-    window.addEventListener('popstate', e => {
-      SPA.route(e.state?.path || '/vehicle-selection');
-    });
-
-    // Delegate SPA links
-    document.body.addEventListener('click', e => {
-      const link = e.target.closest('[data-spa-link]');
-      if (link) {
-        e.preventDefault();
-        SPA.navigateTo(link.getAttribute('href'));
-      }
-    });
-
-    // Initial route
-    SPA.route(window.location.pathname);
+    document.body.appendChild(script);
+  } catch (err) {
+    console.error("Error loading page:", err);
+    app.innerHTML = `<p class="error">Failed to load page. Please try again later.</p>`;
   }
-};
-
-document.addEventListener('DOMContentLoaded', SPA.init);
+});
