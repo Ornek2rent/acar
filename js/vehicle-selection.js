@@ -93,7 +93,7 @@ class VehicleSelection {
 
     this.elements.continueBtn?.addEventListener('click', () => {
       if (this.state.selectedVehicle) {
-        window.location.href = 'extras.html';
+        window.location.href = POSTMAN.EXTRAS_HTML;
       }
     });
   }
