@@ -4,8 +4,7 @@ class VehicleSelection {
   constructor() {
     this.state = {
       selectedVehicle: localStorage.getItem('selectedVehicle') || null,
-      vehicles: [],
-      currentFilter: 'all'
+      vehicles: []
     };
 
     this.elements = {
@@ -13,8 +12,7 @@ class VehicleSelection {
       loading: document.getElementById('loadingIndicator'),
       error: document.getElementById('errorDisplay'),
       retryBtn: document.getElementById('retryButton'),
-      continueBtn: document.getElementById('continueBtn'),
-      filterButtons: document.querySelectorAll('.filter-btn')
+      continueBtn: document.getElementById('continueBtn')
     };
 
     this.init();
@@ -29,60 +27,55 @@ class VehicleSelection {
     try {
       this.showLoading();
 
-      if (!CONFIG?.CARS_API_URL) {
-        throw new Error('Missing CARS_API_URL in config');
-      }
+      if (!CONFIG?.CARS_API_URL) throw new Error('Missing CARS_API_URL in config');
 
-      const response = await fetch(CONFIG.CARS_API_URL);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const res = await fetch(CONFIG.CARS_API_URL);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      this.state.vehicles = await response.json();
+      this.state.vehicles = await res.json();
 
-      if (this.state.vehicles.length === 0) {
+      if (!this.state.vehicles.length) {
         this.showEmptyState();
       } else {
         this.renderVehicles();
         this.showGrid();
       }
 
-    } catch (error) {
-      console.error("Failed to load vehicles:", error);
+    } catch (err) {
+      console.error('Vehicle fetch error:', err);
       this.showError();
     }
   }
 
   renderVehicles() {
-    const filteredVehicles = this.state.currentFilter === 'all'
-      ? this.state.vehicles
-      : this.state.vehicles.filter(v => v.Type === this.state.currentFilter);
-
-    this.elements.grid.innerHTML = filteredVehicles.map(vehicle => `
-      <div class="vehicle-card" 
-           data-id="${vehicle["Car ID"]}" 
-           data-type="${vehicle["Type"] || 'default'}">
-        <h3>${vehicle["Name"]} ${vehicle["Model"]}</h3>
-        <div class="vehicle-details">
-          <p>$${vehicle["Daily Rate"]}/day</p>
-          <p>${vehicle["Seats"]} seats • ${vehicle["Transmission"]}</p>
+    const html = this.state.vehicles.map(vehicle => {
+      const selected = this.state.selectedVehicle === vehicle["Car ID"];
+      return `
+        <div class="vehicle-card" data-id="${vehicle["Car ID"]}">
+          <h3>${vehicle["Name"]} ${vehicle["Model"]}</h3>
+          <div class="vehicle-details">
+            <p>$${vehicle["Daily Rate"]}/day</p>
+            <p>${vehicle["Seats"]} seats • ${vehicle["Transmission"]}</p>
+          </div>
+          <button class="select-btn" 
+                  data-id="${vehicle["Car ID"]}" 
+                  aria-selected="${selected}">
+            ${selected ? '✓ Selected' : 'Select'}
+          </button>
         </div>
-        <button class="select-btn" 
-                data-id="${vehicle["Car ID"]}"
-                aria-selected="${this.state.selectedVehicle === vehicle["Car ID"]}">
-          ${this.state.selectedVehicle === vehicle["Car ID"] ? '✓ Selected' : 'Select'}
-        </button>
-      </div>
-    `).join('');
+      `;
+    }).join('');
+
+    this.elements.grid.innerHTML = html;
+
+    // If previously selected, enable continue
+    if (this.state.selectedVehicle) {
+      this.elements.continueBtn.disabled = false;
+      this.elements.continueBtn.setAttribute('aria-disabled', 'false');
+    }
   }
 
   bindEvents() {
-    this.elements.filterButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        this.state.currentFilter = btn.dataset.filter;
-        this.updateActiveFilter();
-        this.renderVehicles();
-      });
-    });
-
     this.elements.grid.addEventListener('click', (e) => {
       if (e.target.classList.contains('select-btn')) {
         this.selectVehicle(e.target.dataset.id);
@@ -93,7 +86,11 @@ class VehicleSelection {
 
     this.elements.continueBtn?.addEventListener('click', () => {
       if (this.state.selectedVehicle) {
-        window.location.href = POSTMAN.EXTRAS_HTML;
+        // Save to global booking state if SPA
+        if (window.bookingData) {
+          window.bookingData.vehicle = this.state.selectedVehicle;
+        }
+        window.location.href = 'foundation.html?page=extras';
       }
     });
   }
@@ -102,53 +99,42 @@ class VehicleSelection {
     this.state.selectedVehicle = vehicleId;
     localStorage.setItem('selectedVehicle', vehicleId);
 
+    // Update all buttons
     document.querySelectorAll('.select-btn').forEach(btn => {
       const isSelected = btn.dataset.id === vehicleId;
       btn.setAttribute('aria-selected', isSelected);
       btn.textContent = isSelected ? '✓ Selected' : 'Select';
     });
 
-    if (this.elements.continueBtn) {
-      this.elements.continueBtn.disabled = false;
-      this.elements.continueBtn.setAttribute('aria-disabled', 'false');
-    }
-  }
-
-  updateActiveFilter() {
-    this.elements.filterButtons.forEach(btn => {
-      const isActive = btn.dataset.filter === this.state.currentFilter;
-      btn.setAttribute('aria-pressed', isActive);
-      btn.classList.toggle('active', isActive);
-    });
+    this.elements.continueBtn.disabled = false;
+    this.elements.continueBtn.setAttribute('aria-disabled', 'false');
   }
 
   showLoading() {
-    if (this.elements.loading) this.elements.loading.style.display = 'block';
-    if (this.elements.grid) this.elements.grid.style.display = 'none';
-    if (this.elements.error) this.elements.error.style.display = 'none';
+    this.elements.loading.style.display = 'block';
+    this.elements.grid.style.display = 'none';
+    this.elements.error.style.display = 'none';
   }
 
   showGrid() {
-    if (this.elements.loading) this.elements.loading.style.display = 'none';
-    if (this.elements.grid) this.elements.grid.style.display = 'grid';
-    if (this.elements.error) this.elements.error.style.display = 'none';
+    this.elements.loading.style.display = 'none';
+    this.elements.grid.style.display = 'grid';
+    this.elements.error.style.display = 'none';
   }
 
   showError() {
-    if (this.elements.loading) this.elements.loading.style.display = 'none';
-    if (this.elements.grid) this.elements.grid.style.display = 'none';
-    if (this.elements.error) this.elements.error.style.display = 'block';
+    this.elements.loading.style.display = 'none';
+    this.elements.grid.style.display = 'none';
+    this.elements.error.style.display = 'block';
   }
 
   showEmptyState() {
-    this.elements.grid.innerHTML = `
-      <div class="empty-state">
-        <p>No vehicles available</p>
-      </div>`;
+    this.elements.grid.innerHTML = `<div class="empty-state"><p>No vehicles available</p></div>`;
     this.showGrid();
   }
 }
 
+// Support both SPA and standalone
 if (window.bookingSPA) {
   window.initVehicleSelection = () => new VehicleSelection();
 } else {
