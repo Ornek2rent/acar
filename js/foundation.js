@@ -5,31 +5,30 @@ window.bookingData = window.bookingData || {};
 
 const appRoot = document.getElementById('app');
 
-// Map routes to POSTMAN entries
+// Map routes to Postman entries
 const ROUTES = {
   vehicle: {
-    html: POSTMAN.VEHICLE_SELECTION_HTML,
-    js: POSTMAN.VEHICLE_SELECTION_JS,
+    html: Postman.VEHICLE_SELECTION_HTML,
+    js: Postman.VEHICLE_SELECTION_JS,
     initFn: 'initVehicleSelection'
   },
   extras: {
-    html: POSTMAN.EXTRAS_HTML,
-    js: POSTMAN.EXTRAS_JS,
+    html: Postman.EXTRAS_HTML,
+    js: Postman.EXTRAS_JS,
     initFn: 'initExtras'
   },
   payment: {
-    html: POSTMAN.DETAILS_PAYMENT_HTML,
-    js: POSTMAN.DETAILS_PAYMENT_JS,
+    html: Postman.DETAILS_PAYMENT_HTML,
+    js: Postman.DETAILS_PAYMENT_JS,
     initFn: 'initDetailsPayment'
   },
   thankyou: {
-    html: POSTMAN.THANK_YOU_HTML,
-    js: POSTMAN.THANK_YOU_JS,
+    html: Postman.THANK_YOU_HTML,
+    js: Postman.THANK_YOU_JS,
     initFn: 'initThankYou'
   }
 };
 
-// Default route if none specified
 const DEFAULT_PAGE = 'vehicle';
 
 function loadSPAView(page) {
@@ -37,7 +36,7 @@ function loadSPAView(page) {
 
   if (!route) return console.error('Invalid route:', page);
 
-  // Load HTML fragment
+  // Load HTML fragment into #app
   fetch(route.html)
     .then(res => {
       if (!res.ok) throw new Error(`Failed to load ${route.html}`);
@@ -45,7 +44,8 @@ function loadSPAView(page) {
     })
     .then(html => {
       appRoot.innerHTML = html;
-      // Load and run script
+
+      // Load and run page-specific JS
       loadScript(route.js, () => {
         const initFn = window[route.initFn];
         if (typeof initFn === 'function') {
@@ -62,7 +62,7 @@ function loadSPAView(page) {
 }
 
 function loadScript(src, callback) {
-  // Prevent re-loading if already in <head>
+  // Prevent reloading if already loaded
   if (document.querySelector(`script[src="${src}"]`)) {
     callback();
     return;
@@ -94,13 +94,27 @@ function handlePopState(e) {
   loadSPAView(page);
 }
 
+function loadComponent(selector, url) {
+  fetch(url)
+    .then(res => res.ok ? res.text() : '')
+    .then(html => {
+      const container = document.querySelector(selector);
+      if (container) container.innerHTML = html;
+    })
+    .catch(err => console.warn(`Failed to load ${url}:`, err));
+}
+
 function initSPA() {
-  // Handle initial load
+  // Load header and footer
+  loadComponent('#header-container', 'components/header.html');
+  loadComponent('#footer-container', 'components/footer.html');
+
+  // Load initial view
   const params = new URLSearchParams(window.location.search);
   const initialPage = params.get('page') || DEFAULT_PAGE;
   loadSPAView(initialPage);
 
-  // Event listeners
+  // Handle link clicks and browser back/forward
   document.body.addEventListener('click', handleLinkClicks);
   window.addEventListener('popstate', handlePopState);
 }
