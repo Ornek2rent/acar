@@ -27,29 +27,30 @@ class VehicleSelection {
     try {
       this.showLoading();
 
-      if (!CONFIG?.CARS_API_URL) throw new Error('Missing CARS_API_URL in config');
+      if (!CONFIG?.CARS_API_URL) throw new Error('Missing CONFIG.CARS_API_URL');
 
-      const res = await fetch(CONFIG.CARS_API_URL);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const response = await fetch(CONFIG.CARS_API_URL);
+      if (!response.ok) throw new Error(`HTTP error ${response.status}`);
 
-      this.state.vehicles = await res.json();
+      const data = await response.json();
+      this.state.vehicles = data;
 
-      if (!this.state.vehicles.length) {
+      if (!data.length) {
         this.showEmptyState();
       } else {
         this.renderVehicles();
         this.showGrid();
       }
 
-    } catch (err) {
-      console.error('Vehicle fetch error:', err);
+    } catch (error) {
+      console.error('Failed to load vehicles:', error);
       this.showError();
     }
   }
 
   renderVehicles() {
     const html = this.state.vehicles.map(vehicle => {
-      const selected = this.state.selectedVehicle === vehicle["Car ID"];
+      const isSelected = this.state.selectedVehicle === vehicle["Car ID"];
       return `
         <div class="vehicle-card" data-id="${vehicle["Car ID"]}">
           <h3>${vehicle["Name"]} ${vehicle["Model"]}</h3>
@@ -59,8 +60,8 @@ class VehicleSelection {
           </div>
           <button class="select-btn" 
                   data-id="${vehicle["Car ID"]}" 
-                  aria-selected="${selected}">
-            ${selected ? '✓ Selected' : 'Select'}
+                  aria-selected="${isSelected}">
+            ${isSelected ? '✓ Selected' : 'Select'}
           </button>
         </div>
       `;
@@ -68,17 +69,16 @@ class VehicleSelection {
 
     this.elements.grid.innerHTML = html;
 
-    // If previously selected, enable continue
     if (this.state.selectedVehicle) {
-      this.elements.continueBtn.disabled = false;
-      this.elements.continueBtn.setAttribute('aria-disabled', 'false');
+      this.enableContinue();
     }
   }
 
   bindEvents() {
-    this.elements.grid.addEventListener('click', (e) => {
-      if (e.target.classList.contains('select-btn')) {
-        this.selectVehicle(e.target.dataset.id);
+    this.elements.grid?.addEventListener('click', (e) => {
+      const btn = e.target.closest('.select-btn');
+      if (btn) {
+        this.selectVehicle(btn.dataset.id);
       }
     });
 
@@ -86,11 +86,11 @@ class VehicleSelection {
 
     this.elements.continueBtn?.addEventListener('click', () => {
       if (this.state.selectedVehicle) {
-        // Save to global booking state if SPA
         if (window.bookingData) {
           window.bookingData.vehicle = this.state.selectedVehicle;
         }
-        window.location.href = 'foundation.html?page=extras';
+        window.history.pushState({}, '', 'foundation.html?page=extras');
+        window.dispatchEvent(new PopStateEvent('popstate'));
       }
     });
   }
@@ -99,13 +99,16 @@ class VehicleSelection {
     this.state.selectedVehicle = vehicleId;
     localStorage.setItem('selectedVehicle', vehicleId);
 
-    // Update all buttons
     document.querySelectorAll('.select-btn').forEach(btn => {
       const isSelected = btn.dataset.id === vehicleId;
       btn.setAttribute('aria-selected', isSelected);
       btn.textContent = isSelected ? '✓ Selected' : 'Select';
     });
 
+    this.enableContinue();
+  }
+
+  enableContinue() {
     this.elements.continueBtn.disabled = false;
     this.elements.continueBtn.setAttribute('aria-disabled', 'false');
   }
@@ -129,12 +132,12 @@ class VehicleSelection {
   }
 
   showEmptyState() {
-    this.elements.grid.innerHTML = `<div class="empty-state"><p>No vehicles available</p></div>`;
+    this.elements.grid.innerHTML = `<div class="empty-state"><p>No vehicles available.</p></div>`;
     this.showGrid();
   }
 }
 
-// Support both SPA and standalone
+// SPA hook support
 if (window.bookingSPA) {
   window.initVehicleSelection = () => new VehicleSelection();
 } else {
