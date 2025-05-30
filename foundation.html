@@ -4,31 +4,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Rent-a-Car Booking</title>
 
-  <!-- ✅ Content Security Policy (optional, but good practice) -->
+  <!-- Updated CSP to allow Google Apps Script backend -->
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'">
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://script.google.com;">
 
-  <!-- ✅ Styles -->
   <link rel="stylesheet" href="css/style.css" />
 
-  <!-- ✅ Scripts (load config + routing before foundation) -->
   <script src="js/config.js" defer></script>
   <script src="js/postman.js" defer></script>
   <script src="js/foundation.js" defer></script>
 </head>
 <body data-theme="light">
-  <!-- ✅ Dynamic Header Mount Point -->
   <div id="header-container"></div>
 
-  <!-- ✅ Main SPA Content -->
   <main id="app" role="main">
     <div class="loading">Loading...</div>
   </main>
 
-  <!-- ✅ Optional Footer Mount Point -->
   <div id="footer-container"></div>
 </body>
 </html>
