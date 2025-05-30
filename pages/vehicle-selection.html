@@ -1,34 +1,29 @@
 <!-- pages/vehicle-selection.html -->
 
-<h1>Select Your Vehicle</h1>
+<section class="vehicle-container">
+  <h1>Select Your Vehicle</h1>
 
-<!-- Filter Buttons (optional, can be customized later) -->
-<div class="filters" role="toolbar" aria-label="Vehicle Filters">
-  <button class="filter-btn active" data-filter="all" aria-pressed="true">All</button>
-  <button class="filter-btn" data-filter="SUV" aria-pressed="false">SUV</button>
-  <button class="filter-btn" data-filter="Sedan" aria-pressed="false">Sedan</button>
-  <button class="filter-btn" data-filter="Truck" aria-pressed="false">Truck</button>
-</div>
+  <!-- Filter Buttons (optional, if used in JS) -->
+  <div class="filters">
+    <button class="filter-btn" data-filter="all" aria-pressed="true">All</button>
+    <button class="filter-btn" data-filter="Sedan">Sedan</button>
+    <button class="filter-btn" data-filter="SUV">SUV</button>
+    <button class="filter-btn" data-filter="Hatchback">Hatchback</button>
+    <!-- Add more filter types if needed -->
+  </div>
 
-<!-- Vehicle List Grid -->
-<div id="vehicleList" class="vehicle-grid"></div>
+  <!-- Vehicle List Grid -->
+  <div id="vehicleList"></div>
 
-<!-- Continue Button -->
-<div class="actions">
-  <button id="continueBtn" disabled aria-disabled="true">Continue</button>
-</div>
+  <!-- Continue Button -->
+  <div class="actions">
+    <button id="continueBtn" disabled aria-disabled="true">Continue</button>
+  </div>
 
-<!-- Loading and error display elements -->
-<div id="loadingIndicator" style="display: none;">Loading...</div>
-<div id="errorDisplay" style="display: none;">
-  <p>Something went wrong. Please try again.</p>
-  <button id="retryButton">Retry</button>
-</div>
-
-<!-- Load vehicle-selection.js dynamically -->
-<script>
-  const script = document.createElement('script');
-  script.src = POSTMAN.VEHICLE_SELECTION_JS;
-  script.defer = true;
-  document.head.appendChild(script);
-</script>
+  <!-- Loading and Error States -->
+  <div id="loadingIndicator" style="display: none;">Loading...</div>
+  <div id="errorDisplay" style="display: none;">
+    <p>Something went wrong. Please try again.</p>
+    <button id="retryButton">Retry</button>
+  </div>
+</section>
