@@ -7,14 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rent-a-Car Booking</title>
 
-  <!-- ✅ Content Security Policy (must be in <head>) -->
+  <!-- ✅ Content Security Policy (optional, but good practice) -->
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'">
 
-  <!-- ✅ Stylesheet -->
+  <!-- ✅ Styles -->
   <link rel="stylesheet" href="css/style.css" />
 
-  <!-- ✅ Scripts (deferred) -->
+  <!-- ✅ Scripts (load config + routing before foundation) -->
   <script src="js/config.js" defer></script>
   <script src="js/postman.js" defer></script>
   <script src="js/foundation.js" defer></script>
@@ -23,14 +23,12 @@
   <!-- ✅ Dynamic Header Mount Point -->
   <div id="header-container"></div>
 
-  <!-- ✅ SPA Content Mount Point -->
+  <!-- ✅ Main SPA Content -->
   <main id="app" role="main">
     <div class="loading">Loading...</div>
   </main>
 
-  <!-- ✅ Dynamic Footer Mount Point -->
-  <div id="footer-container">
-    <!-- Fallback: if footer.html doesn't exist, this stays empty -->
-  </div>
+  <!-- ✅ Optional Footer Mount Point -->
+  <div id="footer-container"></div>
 </body>
 </html>
