@@ -6,108 +6,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rent-a-Car | Book Now</title>
+
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/config.js" defer></script>
-  <script src="js/load-header.js" defer></script>
-  <script src="js/index.js" defer></script>
-  <style>
-    /* Critical CSS for elements needed immediately */
-    .visually-hidden {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      border: 0;
-    }
-    .form-actions {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
-    .test-btn {
-      background: #f0f0f0;
-      color: #333;
-      border: 1px solid #ddd;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-  </style>
+  <script src="js/load-header.js" defer></script> <!-- Modular header loader -->
+  <script src="js/index.js" defer></script> <!-- Updated logic script -->
 </head>
 <body data-theme="light">
-  <!-- Header placeholder -->
+  <!-- Header gets loaded here -->
   <div id="header-container"></div>
 
   <main class="form-container">
     <h1>Book Your Car</h1>
-    <form id="bookingForm" method="POST" action="">
-      <!-- Pickup Location -->
-      <div class="form-group">
-        <label for="pickupLocation">Pickup Location:</label>
-        <input 
-          type="text" 
-          id="pickupLocation" 
-          name="pickupLocation" 
-          required
-          aria-required="true"
-          placeholder="Enter city or airport code"
-        >
-      </div>
+    <form id="bookingForm" target="hidden_iframe" method="POST" action="">
+      <label for="pickupLocation">Pickup Location:</label>
+      <input type="text" id="pickupLocation" name="pickupLocation" required />
 
-      <!-- Date/Time Pickers -->
-      <div class="form-group">
-        <label for="pickupDateTime">Pickup Date & Time:</label>
-        <input 
-          type="datetime-local" 
-          id="pickupDateTime" 
-          name="pickupDateTime" 
-          required
-          aria-required="true"
-        >
-      </div>
+      <label for="pickupDateTime">Pickup Date & Time:</label>
+      <input type="datetime-local" id="pickupDateTime" name="pickupDateTime" required />
 
-      <div class="form-group">
-        <label for="returnDateTime">Return Date & Time:</label>
-        <input 
-          type="datetime-local" 
-          id="returnDateTime" 
-          name="returnDateTime" 
-          required
-          aria-required="true"
-        >
-      </div>
+      <label for="returnDateTime">Return Date & Time:</label>
+      <input type="datetime-local" id="returnDateTime" name="returnDateTime" required />
 
-      <!-- Age Checkbox -->
-      <div class="form-group checkbox-group">
-        <label>
-          <input 
-            type="checkbox" 
-            id="under25" 
-            name="under25"
-            aria-describedby="ageHelpText"
-          >
-          <span>Driver under 25?</span>
-        </label>
-        <p id="ageHelpText" class="help-text">Additional fees may apply</p>
-      </div>
+      <label>
+        <input type="checkbox" id="under25" name="under25" /> Driver under 25?
+      </label>
 
-      <!-- Form Actions -->
-      <div class="form-actions">
-        <button type="submit" class="primary-btn">Continue</button>
-        <!-- Test button injected by JS in development -->
-      </div>
+      <button type="submit">Continue</button>
     </form>
-
-    <!-- Accessible hidden iframe -->
-    <iframe 
-      name="hidden_iframe" 
-      id="hidden_iframe" 
-      class="visually-hidden"
-      title="Form submission hidden frame"
-    ></iframe>
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
   </main>
 </body>
 </html>
