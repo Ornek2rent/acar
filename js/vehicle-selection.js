@@ -1,11 +1,11 @@
-/* vehicle-selection.js */
-/* lalalatest */
+// js/vehicle-selection.js
 
 class VehicleSelection {
   constructor() {
     this.state = {
       selectedVehicle: localStorage.getItem('selectedVehicle') || null,
-      vehicles: []
+      vehicles: [],
+      currentFilter: 'all'
     };
 
     this.elements = {
@@ -13,7 +13,8 @@ class VehicleSelection {
       loading: document.getElementById('loadingIndicator'),
       error: document.getElementById('errorDisplay'),
       retryBtn: document.getElementById('retryButton'),
-      continueBtn: document.getElementById('continueBtn')
+      continueBtn: document.getElementById('continueBtn'),
+      filterButtons: document.querySelectorAll('.filter-btn')
     };
 
     this.init();
@@ -28,58 +29,62 @@ class VehicleSelection {
     try {
       this.showLoading();
 
-      if (!CONFIG?.CARS_API_URL) throw new Error('Missing CONFIG.CARS_API_URL');
+      if (!CONFIG?.CARS_API_URL) {
+        throw new Error('Missing CARS_API_URL in config');
+      }
 
       const response = await fetch(CONFIG.CARS_API_URL);
-      if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-      const data = await response.json();
-      this.state.vehicles = data;
+      this.state.vehicles = await response.json();
 
-      if (!data.length) {
+      if (this.state.vehicles.length === 0) {
         this.showEmptyState();
       } else {
         this.renderVehicles();
         this.showGrid();
       }
-
     } catch (error) {
-      console.error('Failed to load vehicles:', error);
+      console.error("Failed to load vehicles:", error);
       this.showError();
     }
   }
 
   renderVehicles() {
-    const html = this.state.vehicles.map(vehicle => {
-      const isSelected = this.state.selectedVehicle === vehicle["Car ID"];
-      return `
-        <div class="vehicle-card" data-id="${vehicle["Car ID"]}">
-          <h3>${vehicle["Name"]} ${vehicle["Model"]}</h3>
-          <div class="vehicle-details">
-            <p>$${vehicle["Daily Rate"]}/day</p>
-            <p>${vehicle["Seats"]} seats • ${vehicle["Transmission"]}</p>
-          </div>
-          <button class="select-btn" 
-                  data-id="${vehicle["Car ID"]}" 
-                  aria-selected="${isSelected}">
-            ${isSelected ? '✓ Selected' : 'Select'}
-          </button>
+    const filteredVehicles = this.state.currentFilter === 'all'
+      ? this.state.vehicles
+      : this.state.vehicles.filter(v => v.Type === this.state.currentFilter);
+
+    this.elements.grid.innerHTML = filteredVehicles.map(vehicle => `
+      <div class="vehicle-card" 
+           data-id="${vehicle["Car ID"]}" 
+           data-type="${vehicle["Type"] || 'default'}">
+        <h3>${vehicle["Name"]} ${vehicle["Model"]}</h3>
+        <div class="vehicle-details">
+          <p>$${vehicle["Daily Rate"]}/day</p>
+          <p>${vehicle["Seats"]} seats • ${vehicle["Transmission"]}</p>
         </div>
-      `;
-    }).join('');
-
-    this.elements.grid.innerHTML = html;
-
-    if (this.state.selectedVehicle) {
-      this.enableContinue();
-    }
+        <button class="select-btn" 
+                data-id="${vehicle["Car ID"]}"
+                aria-selected="${this.state.selectedVehicle === vehicle["Car ID"]}">
+          ${this.state.selectedVehicle === vehicle["Car ID"] ? '✓ Selected' : 'Select'}
+        </button>
+      </div>
+    `).join('');
   }
 
   bindEvents() {
-    this.elements.grid?.addEventListener('click', (e) => {
-      const btn = e.target.closest('.select-btn');
-      if (btn) {
-        this.selectVehicle(btn.dataset.id);
+    this.elements.filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.state.currentFilter = btn.dataset.filter;
+        this.updateActiveFilter();
+        this.renderVehicles();
+      });
+    });
+
+    this.elements.grid.addEventListener('click', (e) => {
+      if (e.target.classList.contains('select-btn')) {
+        this.selectVehicle(e.target.dataset.id);
       }
     });
 
@@ -87,11 +92,8 @@ class VehicleSelection {
 
     this.elements.continueBtn?.addEventListener('click', () => {
       if (this.state.selectedVehicle) {
-        if (window.bookingData) {
-          window.bookingData.vehicle = this.state.selectedVehicle;
-        }
-        window.history.pushState({}, '', 'foundation.html?page=extras');
-        window.dispatchEvent(new PopStateEvent('popstate'));
+        history.pushState({ page: 'extras' }, '', 'foundation.html?page=extras');
+        loadSPAView('extras');
       }
     });
   }
@@ -106,12 +108,18 @@ class VehicleSelection {
       btn.textContent = isSelected ? '✓ Selected' : 'Select';
     });
 
-    this.enableContinue();
+    if (this.elements.continueBtn) {
+      this.elements.continueBtn.disabled = false;
+      this.elements.continueBtn.setAttribute('aria-disabled', 'false');
+    }
   }
 
-  enableContinue() {
-    this.elements.continueBtn.disabled = false;
-    this.elements.continueBtn.setAttribute('aria-disabled', 'false');
+  updateActiveFilter() {
+    this.elements.filterButtons.forEach(btn => {
+      const isActive = btn.dataset.filter === this.state.currentFilter;
+      btn.setAttribute('aria-pressed', isActive);
+      btn.classList.toggle('active', isActive);
+    });
   }
 
   showLoading() {
@@ -133,12 +141,15 @@ class VehicleSelection {
   }
 
   showEmptyState() {
-    this.elements.grid.innerHTML = `<div class="empty-state"><p>No vehicles available.</p></div>`;
+    this.elements.grid.innerHTML = `
+      <div class="empty-state">
+        <p>No vehicles available</p>
+      </div>`;
     this.showGrid();
   }
 }
 
-// SPA hook support
+// Entry point: supports both SPA and classic page load
 if (window.bookingSPA) {
   window.initVehicleSelection = () => new VehicleSelection();
 } else {
