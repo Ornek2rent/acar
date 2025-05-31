@@ -1,16 +1,6 @@
 <!-- pages/vehicle-selection.html -->
-
-<section class="vehicle-container">
+<div class="vehicle-container">
   <h1>Select Your Vehicle</h1>
-
-  <!-- Filter Buttons (optional, if used in JS) -->
-  <div class="filters">
-    <button class="filter-btn" data-filter="all" aria-pressed="true">All</button>
-    <button class="filter-btn" data-filter="Sedan">Sedan</button>
-    <button class="filter-btn" data-filter="SUV">SUV</button>
-    <button class="filter-btn" data-filter="Hatchback">Hatchback</button>
-    <!-- Add more filter types if needed -->
-  </div>
 
   <!-- Vehicle List Grid -->
   <div id="vehicleList"></div>
@@ -20,10 +10,10 @@
     <button id="continueBtn" disabled aria-disabled="true">Continue</button>
   </div>
 
-  <!-- Loading and Error States -->
+  <!-- Loading and error display elements -->
   <div id="loadingIndicator" style="display: none;">Loading...</div>
   <div id="errorDisplay" style="display: none;">
     <p>Something went wrong. Please try again.</p>
     <button id="retryButton">Retry</button>
   </div>
-</section>
+</div>
